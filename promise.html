@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script>
+      // const myPromise = new Promise((res, rej) => {
+      //   console.log('1')
+      //   res(2)
+      //   console.log('3')
+      // })
+      // myPromise.then((res) => console.log(res))
+      // Promise.resolve('hhaha')
+      //   .then(20) // 传入一个数字，而不是函数
+      //   .then((value) => {
+      //     console.log(value) // 输出 10，而不是 20
+      //   })
+      // console.log('www')
+
+      // const first = () =>
+      //   new Promise((resolve, reject) => {
+      //     console.log(3)
+      //     let p = new Promise((resolve, reject) => {
+      //       console.log(7)
+      //       setTimeout(() => {
+      //         console.log(5)
+      //         resolve(6)
+      //       }, 0)
+      //       resolve(1)
+      //     })
+      //     resolve(2)
+      //     p.then((arg) => {
+      //       console.log(arg)
+      //     })
+      //   })
+
+      // first().then((arg) => {
+      //   console.log(arg)
+      // })
+      // console.log(4)
+
+      // new Promise((res) => res('res1')).then((res) => console.log(res)).then((res) => console.log(res))
+
+      // const promise = Promise.resolve().then(() => {
+      //   return promise
+      // })
+      // promise.catch(console.error)
+
+      //红绿灯交叉
+      // function red() {
+      //   console.log('red')
+      // }
+      // function green() {
+      //   console.log('green')
+      // }
+      // function back() {
+      //   console.log('back')
+      // }
+      // let run = (time, cb) => {
+      //   return new Promise((resolve) => {
+      //     setTimeout(() => {
+      //       cb()
+      //       resolve()
+      //     }, time)
+      //   })
+      // }
+      // async function start() {
+      //   while (true) {
+      //     await run(1000, red)
+      // }
+      // start()
+      // function red() {
+      //   console.log('red')
+      // }
+      // function green() {
+      //   console.log('green')
+      // }
+      // function back() {
+      //   console.log('back')
+      // }
+
+      // let run = (time, cb) => {
+      //   return new Promise((resolve) => {
+      //     setTimeout(() => {
+      //       resolve()
+      //       cb()
+      //     }, time)
+      //   })
+      // }
+
+      // async function start() {
+      //   while (true) {
+      //     await run(1000, red)
+      //     await run(1000, green)
+      //     await run(1000, back)
+      //   }
+      // }
+      // function cycle(){
+      //   run(1000,red).then()
+      // }
+      // function start() {
+      //   while (true) {
+      //     run(1000, red).then(() => run(1000, green))
+      //   }
+      // }
+
+      // start()
+      function red() {
+        console.log('red')
+      }
+
+      function green() {
+        console.log('green')
+      }
+
+      function yellow() {
+        console.log('yellow')
+      }
+
+      let myLight = (timer, cb) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            cb()
+            resolve()
+          }, timer)
+        })
+      }
+
+      let myStep = () => {
+        Promise.resolve()
+          .then(() => {
+            return myLight(3000, red)
+          })
+          .then(() => {
+            return myLight(2000, green)
+          })
+          .then(() => {
+            return myLight(1000, yellow)
+          })
+          .then(() => {
+            myStep()
+          })
+      }
+      myStep()
+    </script>
+  </head>
+  <body></body>
+</html>

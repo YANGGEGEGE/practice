@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>requestAnimationFrame Canvas 动画示例</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background-color: #f5f5f5;
+      }
+      .container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      canvas {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+      }
+      .controls {
+        margin: 20px 0;
+      }
+      button {
+        padding: 8px 15px;
+        margin-right: 10px;
+        background-color: #9b59b6;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #8e44ad;
+      }
+      h1 {
+        color: #2c3e50;
+      }
+      .explanation {
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+      .fps-counter {
+        margin-top: 10px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Canvas 动画与 requestAnimationFrame</h1>
+
+      <div class="explanation">
+        <p>这个示例展示了 requestAnimationFrame 在 Canvas 动画中的应用。</p>
+        <p>
+          Canvas 是 requestAnimationFrame
+          的理想搭配，因为每一帧都需要清除画布并重新绘制，与浏览器的重绘周期同步可以获得最佳性能。
+        </p>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">开始动画</button>
+        <button id="stopBtn">停止动画</button>
+        <button id="addBallBtn">添加小球</button>
+        <div class="fps-counter">帧率: <span id="fps">0</span> FPS</div>
+      </div>
+
+      <canvas id="animationCanvas" width="800" height="400"></canvas>
+    </div>
+
+    <script>
+      const canvas = document.getElementById('animationCanvas')
+      const ctx = canvas.getContext('2d')
+      const startBtn = document.getElementById('startBtn')
+      const stopBtn = document.getElementById('stopBtn')
+      const addBallBtn = document.getElementById('addBallBtn')
+      const fpsDisplay = document.getElementById('fps')
+
+      let animationId = null
+      let balls = []
+      let isAnimating = false
+
+      // FPS 计算相关变量
+      let frameCount = 0
+      let lastTime = performance.now()
+
+      // 初始小球数量
+      const initialBallCount = 10
+
+      // 生成随机颜色
+      function getRandomColor() {
+        const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c', '#e67e22', '#34495e']
+        return colors[Math.floor(Math.random() * colors.length)]
+      }
+
+      // 创建一个新小球
+      function createBall() {
+        const radius = 5 + Math.random() * 20
+        return {
+          x: Math.random() * (canvas.width - radius * 2) + radius,
+          y: Math.random() * (canvas.height - radius * 2) + radius,
+          radius: radius,
+          color: getRandomColor(),
+          speedX: (Math.random() - 0.5) * 5,
+          speedY: (Math.random() - 0.5) * 5,
+        }
+      }
+
+      // 初始化小球
+      function initBalls(count) {
+        balls = []
+        for (let i = 0; i < count; i++) {
+          balls.push(createBall())
+        }
+      }
+
+      // 绘制单个小球
+      function drawBall(ball) {
+        ctx.beginPath()
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2)
+        ctx.fillStyle = ball.color
+        ctx.fill()
+        ctx.closePath()
+      }
+
+      // 更新小球位置
+      function updateBall(ball, deltaTime) {
+        // 计算新位置（基于时间的移动，保证不同设备上速度一致）
+        ball.x += (ball.speedX * deltaTime) / 16 // 16ms 约等于 60fps
+        ball.y += (ball.speedY * deltaTime) / 16
+
+        // 边界检测：碰到边界反弹
+        if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width) {
+          ball.speedX = -ball.speedX
+          // 确保不会卡在边界
+          ball.x = Math.max(ball.radius, Math.min(canvas.width - ball.radius, ball.x))
+        }
+
+        if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+          ball.speedY = -ball.speedY
+          // 确保不会卡在边界
+          ball.y = Math.max(ball.radius, Math.min(canvas.height - ball.radius, ball.y))
+        }
+      }
+
+      // 绘制所有小球
+      function drawBalls() {
+        for (const ball of balls) {
+          drawBall(ball)
+        }
+      }
+
+      // 更新所有小球位置
+      function updateBalls(deltaTime) {
+        for (const ball of balls) {
+          updateBall(ball, deltaTime)
+        }
+      }
+
+      // 主动画循环函数
+      let lastFrameTime = 0
+      function animate(timestamp) {
+        // 计算两帧之间的时间差（毫秒）
+        const deltaTime = lastFrameTime ? timestamp - lastFrameTime : 16
+        lastFrameTime = timestamp
+
+        // 清除画布
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        // 更新和绘制小球
+        updateBalls(deltaTime)
+        drawBalls()
+
+        // 计算 FPS
+        frameCount++
+        if (timestamp - lastTime >= 1000) {
+          const fps = Math.round((frameCount * 1000) / (timestamp - lastTime))
+          fpsDisplay.textContent = fps
+          frameCount = 0
+          lastTime = timestamp
+        }
+
+        // 继续动画循环
+        if (isAnimating) {
+          animationId = requestAnimationFrame(animate)
+        }
+      }
+
+      // 开始动画
+      function startAnimation() {
+        if (!isAnimating) {
+          isAnimating = true
+          lastFrameTime = 0
+          animationId = requestAnimationFrame(animate)
+        }
+      }
+
+      // 停止动画
+      function stopAnimation() {
+        isAnimating = false
+        if (animationId) {
+          cancelAnimationFrame(animationId)
+          animationId = null
+        }
+      }
+
+      // 添加一个新小球
+      function addBall() {
+        balls.push(createBall())
+        if (!isAnimating) {
+          // 如果没有动画，绘制一次
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          drawBalls()
+        }
+        // 更新小球数量显示
+        document.title = `${balls.length} 个小球 - Canvas 动画示例`
+      }
+
+      // 注册事件处理函数
+      startBtn.addEventListener('click', startAnimation)
+      stopBtn.addEventListener('click', stopAnimation)
+      addBallBtn.addEventListener('click', addBall)
+
+      // 初始化
+      initBalls(initialBallCount)
+      // 先绘制一次初始状态
+      drawBalls()
+      document.title = `${balls.length} 个小球 - Canvas 动画示例`
+    </script>
+  </body>
+</html>

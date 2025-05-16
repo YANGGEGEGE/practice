@@ -1,0 +1,13 @@
+{
+  "name": "require-vs-import",
+  "version": "1.0.0",
+  "description": "CommonJS 和 ES Modules 区别示例",
+  "main": "index.js",
+  "scripts": {
+    "require": "node require-example.js",
+    "import": "node import-example.mjs"
+  },
+  "keywords": ["CommonJS", "ESM", "require", "import", "面试题"],
+  "author": "",
+  "license": "ISC"
+} 

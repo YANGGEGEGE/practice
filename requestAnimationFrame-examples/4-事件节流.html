@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>requestAnimationFrame 事件节流示例</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      }
+      .container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .demo-area {
+        display: flex;
+        flex-direction: column;
+        margin-top: 20px;
+      }
+      .events-container {
+        display: flex;
+        margin-bottom: 20px;
+      }
+      .event-box {
+        flex: 1;
+        height: 300px;
+        overflow: auto;
+        border: 1px solid #ddd;
+        padding: 10px;
+        margin: 0 10px;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+      }
+      .event-box h3 {
+        text-align: center;
+        margin-top: 0;
+        color: #2c3e50;
+      }
+      .event-count {
+        display: block;
+        text-align: center;
+        font-size: 24px;
+        margin: 10px 0;
+        color: #e74c3c;
+      }
+      .tracking-area {
+        width: 100%;
+        height: 200px;
+        background-color: #ecf0f1;
+        position: relative;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+      .tracker {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .raw-tracker {
+        background-color: rgba(231, 76, 60, 0.5);
+        z-index: 1;
+      }
+      .raf-tracker {
+        background-color: rgba(46, 204, 113, 0.8);
+        z-index: 2;
+      }
+      .performance-metrics {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 4px;
+      }
+      .metric {
+        text-align: center;
+      }
+      .metric-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #3498db;
+      }
+      .controls {
+        margin: 20px 0;
+      }
+      button {
+        padding: 8px 15px;
+        margin-right: 10px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #2980b9;
+      }
+      h1 {
+        color: #2c3e50;
+      }
+      .explanation {
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+      .event-item {
+        margin-bottom: 5px;
+        padding: 5px;
+        border-radius: 4px;
+        font-family: monospace;
+        white-space: nowrap;
+        font-size: 12px;
+      }
+      .raw-event {
+        background-color: rgba(231, 76, 60, 0.1);
+      }
+      .raf-event {
+        background-color: rgba(46, 204, 113, 0.1);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>requestAnimationFrame 事件节流</h1>
+
+      <div class="explanation">
+        <p>这个示例展示了如何使用 requestAnimationFrame 优化滚动、鼠标移动等高频率事件的处理。</p>
+        <p>
+          相比传统的 setTimeout/setInterval 节流方法，requestAnimationFrame
+          方式更加高效，与浏览器重绘同步，提供更平滑的体验。
+        </p>
+        <p>
+          在下方的跟踪区域中移动鼠标，观察原始事件与优化后事件的区别。绿色点表示使用 requestAnimationFrame
+          优化后的位置，红色点表示原始事件位置。
+        </p>
+      </div>
+
+      <div class="controls">
+        <button id="clearBtn">清除数据</button>
+        <button id="toggleTracking">暂停/继续跟踪</button>
+      </div>
+
+      <div class="tracking-area" id="trackingArea">
+        <div class="tracker raw-tracker" id="rawTracker"></div>
+        <div class="tracker raf-tracker" id="rafTracker"></div>
+      </div>
+
+      <div class="events-container">
+        <div class="event-box">
+          <h3>原始事件</h3>
+          <span class="event-count" id="rawCount">0</span>
+          <div id="rawEvents"></div>
+        </div>
+        <div class="event-box">
+          <h3>RAF 优化事件</h3>
+          <span class="event-count" id="rafCount">0</span>
+          <div id="rafEvents"></div>
+        </div>
+      </div>
+
+      <div class="performance-metrics">
+        <div class="metric">
+          <div class="metric-value" id="rawFrequency">0</div>
+          <div>原始事件频率 (事件/秒)</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="rafFrequency">0</div>
+          <div>RAF 事件频率 (事件/秒)</div>
+        </div>
+        <div class="metric">
+          <div class="metric-value" id="reductionRate">0%</div>
+          <div>处理率减少</div>
+        </div>
+      </div>
+
+      <div class="demo-area">
+        <h2>代码实现</h2>
+        <pre><code>
+// 使用 requestAnimationFrame 实现事件节流
+function throttleRAF(callback) {
+    let ticking = false;
+    
+    return function(...args) {
+        if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(() => {
+                callback(...args);
+                ticking = false;
+            });
+        }
+    };
+}
+
+// 使用方法
+const throttledCallback = throttleRAF((event) => {
+    // 处理事件...
+});
+
+// 注册事件监听
+element.addEventListener('mousemove', throttledCallback);
+            </code></pre>
+      </div>
+    </div>
+
+    <script>
+      // 获取 DOM 元素
+      const trackingArea = document.getElementById('trackingArea')
+      const rawTracker = document.getElementById('rawTracker')
+      const rafTracker = document.getElementById('rafTracker')
+      const rawEvents = document.getElementById('rawEvents')
+      const rafEvents = document.getElementById('rafEvents')
+      const rawCount = document.getElementById('rawCount')
+      const rafCount = document.getElementById('rafCount')
+      const rawFrequency = document.getElementById('rawFrequency')
+      const rafFrequency = document.getElementById('rafFrequency')
+      const reductionRate = document.getElementById('reductionRate')
+      const clearBtn = document.getElementById('clearBtn')
+      const toggleTrackingBtn = document.getElementById('toggleTracking')
+
+      // 跟踪状态
+      let isTracking = true
+      let rawEventCount = 0
+      let rafEventCount = 0
+      let rawEventsLastSecond = 0
+      let rafEventsLastSecond = 0
+      let lastSecondTimestamp = performance.now()
+
+      // requestAnimationFrame 节流
+      function throttleRAF(callback) {
+        let ticking = false
+
+        return function (...args) {
+          if (!ticking) {
+            ticking = true
+            requestAnimationFrame(() => {
+              callback(...args)
+              ticking = false
+            })
+          }
+        }
+      }
+
+      // 记录事件到显示区域
+      function logRawEvent(x, y) {
+        if (!isTracking) return
+
+        rawEventCount++
+        rawCount.textContent = rawEventCount
+
+        const eventItem = document.createElement('div')
+        eventItem.className = 'event-item raw-event'
+        eventItem.textContent = `鼠标位置 X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}`
+
+        rawEvents.insertBefore(eventItem, rawEvents.firstChild)
+        if (rawEvents.children.length > 100) {
+          rawEvents.removeChild(rawEvents.lastChild)
+        }
+      }
+
+      function logRAFEvent(x, y) {
+        if (!isTracking) return
+
+        rafEventCount++
+        rafCount.textContent = rafEventCount
+
+        const eventItem = document.createElement('div')
+        eventItem.className = 'event-item raf-event'
+        eventItem.textContent = `鼠标位置 X: ${x.toFixed(2)}, Y: ${y.toFixed(2)}`
+
+        rafEvents.insertBefore(eventItem, rafEvents.firstChild)
+        if (rafEvents.children.length > 100) {
+          rafEvents.removeChild(rafEvents.lastChild)
+        }
+      }
+
+      // 更新跟踪器位置
+      function updateRawTracker(x, y) {
+        if (!isTracking) return
+        rawTracker.style.left = `${x}px`
+        rawTracker.style.top = `${y}px`
+        logRawEvent(x, y)
+      }
+
+      function updateRAFTracker(x, y) {
+        if (!isTracking) return
+        rafTracker.style.left = `${x}px`
+        rafTracker.style.top = `${y}px`
+        logRAFEvent(x, y)
+      }
+
+      // 使用 requestAnimationFrame 节流的鼠标移动处理
+      const throttledMouseMove = throttleRAF((x, y) => {
+        updateRAFTracker(x, y)
+      })
+
+      // 监听鼠标移动事件
+      trackingArea.addEventListener('mousemove', function (e) {
+        // 获取鼠标相对于跟踪区域的位置
+        const rect = trackingArea.getBoundingClientRect()
+        const x = e.clientX - rect.left
+        const y = e.clientY - rect.top
+
+        // 更新原始跟踪器
+        updateRawTracker(x, y)
+
+        // 使用节流后的函数更新 RAF 跟踪器
+        throttledMouseMove(x, y)
+
+        // 更新每秒事件计数
+        rawEventsLastSecond++
+      })
+
+      // 定期更新性能指标
+      function updatePerformanceMetrics() {
+        const now = performance.now()
+        const elapsedTime = (now - lastSecondTimestamp) / 1000 // 转换为秒
+
+        if (elapsedTime >= 1) {
+          // 计算频率 (每秒事件数)
+          const rawFreq = Math.round(rawEventsLastSecond / elapsedTime)
+          const rafFreq = Math.round(rafEventsLastSecond / elapsedTime)
+
+          // 计算减少率
+          const reduction = rafFreq > 0 ? ((rawFreq - rafFreq) / rawFreq) * 100 : 0
+
+          // 更新显示
+          rawFrequency.textContent = rawFreq
+          rafFrequency.textContent = rafFreq
+          reductionRate.textContent = `${Math.round(reduction)}%`
+
+          // 重置计数
+          rawEventsLastSecond = 0
+          rafEventsLastSecond = 0
+          lastSecondTimestamp = now
+        }
+
+        // 继续更新
+        requestAnimationFrame(updatePerformanceMetrics)
+      }
+
+      // 清除数据
+      function clearData() {
+        rawEvents.innerHTML = ''
+        rafEvents.innerHTML = ''
+        rawEventCount = 0
+        rafEventCount = 0
+        rawCount.textContent = '0'
+        rafCount.textContent = '0'
+      }
+
+      // 切换跟踪状态
+      function toggleTracking() {
+        isTracking = !isTracking
+        toggleTrackingBtn.textContent = isTracking ? '暂停跟踪' : '继续跟踪'
+      }
+
+      // 初始化
+      function init() {
+        // 注册清除按钮事件
+        clearBtn.addEventListener('click', clearData)
+        toggleTrackingBtn.addEventListener('click', toggleTracking)
+
+        // 开始监控性能指标
+        requestAnimationFrame(updatePerformanceMetrics)
+      }
+
+      // 启动应用
+      init()
+    </script>
+  </body>
+</html>

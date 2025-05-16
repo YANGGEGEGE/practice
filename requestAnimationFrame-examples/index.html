@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>requestAnimationFrame 示例集</title>
+    <style>
+      body {
+        font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-top: 0;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #eee;
+      }
+      .intro {
+        margin-bottom: 30px;
+        line-height: 1.6;
+      }
+      .examples {
+        list-style: none;
+        padding: 0;
+      }
+      .example {
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        transition: transform 0.2s;
+      }
+      .example:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+      .example a {
+        display: block;
+        color: #3498db;
+        font-size: 1.2em;
+        font-weight: bold;
+        text-decoration: none;
+        margin-bottom: 10px;
+      }
+      .example a:hover {
+        color: #2980b9;
+      }
+      .example p {
+        margin: 0;
+        color: #7f8c8d;
+      }
+      .docs-link {
+        text-align: center;
+        margin-top: 30px;
+      }
+      .docs-link a {
+        color: #3498db;
+        text-decoration: none;
+      }
+      .docs-link a:hover {
+        text-decoration: underline;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+        color: #95a5a6;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>requestAnimationFrame 示例集</h1>
+
+      <div class="intro">
+        <p>
+          requestAnimationFrame 是浏览器提供的一个用于优化动画效果的
+          API，它会告诉浏览器你希望执行一个动画，并请求浏览器在下一次重绘之前调用指定的回调函数来更新动画。
+        </p>
+        <p>以下示例展示了 requestAnimationFrame 在不同场景下的应用。点击链接可以查看具体示例和详细说明。</p>
+        <p>
+          你还可以查看 <a href="requestAnimationFrame面试题.md" target="_blank">面试题集锦</a> 来了解更多相关知识点。
+        </p>
+      </div>
+
+      <ul class="examples">
+        <li class="example">
+          <a href="1-基础动画.html" target="_blank">1. 基础动画</a>
+          <p>
+            展示了 requestAnimationFrame 的基本用法，实现平滑的元素移动动画。与 setTimeout/setInterval
+            不同，requestAnimationFrame 会自动与浏览器的重绘周期同步，提供更平滑的动画体验。
+          </p>
+        </li>
+
+        <li class="example">
+          <a href="2-Canvas动画.html" target="_blank">2. Canvas 动画</a>
+          <p>
+            展示了 requestAnimationFrame 在 Canvas 绘图中的应用。Canvas 是 requestAnimationFrame
+            的理想搭配，因为每一帧都需要清除画布并重新绘制，与浏览器的重绘周期同步可以获得最佳性能。
+          </p>
+        </li>
+
+        <li class="example">
+          <a href="3-平滑滚动.html" target="_blank">3. 平滑滚动</a>
+          <p>
+            展示了如何使用 requestAnimationFrame 实现平滑的页面滚动效果。相比 CSS 的 scroll-behavior:
+            smooth，这种方法提供了更多的控制权和自定义的动画曲线。
+          </p>
+        </li>
+
+        <li class="example">
+          <a href="4-事件节流.html" target="_blank">4. 事件节流</a>
+          <p>
+            展示了如何使用 requestAnimationFrame 优化滚动、鼠标移动等高频率事件的处理。相比传统的 setTimeout/setInterval
+            节流方法，这种方式更加高效。
+          </p>
+        </li>
+      </ul>
+
+      <div class="docs-link">
+        <a href="https://developer.mozilla.org/zh-CN/docs/Web/API/window/requestAnimationFrame" target="_blank"
+          >查看 MDN 文档 &rarr;</a
+        >
+      </div>
+
+      <div class="footer">
+        <p>这些示例旨在帮助理解 requestAnimationFrame 的工作原理和应用场景。</p>
+        <p>在实际项目中，你可能还会结合其他技术如 Web Animations API 或动画库使用它。</p>
+      </div>
+    </div>
+  </body>
+</html>

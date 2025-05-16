@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>requestAnimationFrame 基础动画示例</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      }
+      .container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .box {
+        width: 50px;
+        height: 50px;
+        background-color: #3498db;
+        border-radius: 4px;
+        position: relative;
+        left: 0;
+      }
+      .controls {
+        margin: 20px 0;
+      }
+      button {
+        padding: 8px 15px;
+        margin-right: 10px;
+        background-color: #2ecc71;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #27ae60;
+      }
+      .metrics {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+      }
+      h1 {
+        color: #2c3e50;
+      }
+      .explanation {
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>requestAnimationFrame 基础动画</h1>
+
+      <div class="explanation">
+        <p>这个示例展示了 requestAnimationFrame 的基本用法。方块会从左到右移动，当到达边界时会重新开始。</p>
+        <p>
+          与 setTimeout/setInterval 不同，requestAnimationFrame 会自动与浏览器的重绘周期同步，提供更平滑的动画效果。
+        </p>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn">开始动画</button>
+        <button id="stopBtn">停止动画</button>
+        <button id="resetBtn">重置</button>
+      </div>
+
+      <div class="box" id="animatedBox"></div>
+
+      <div class="metrics">
+        <p>帧率: <span id="fps">0</span> FPS</p>
+        <p>运行时间: <span id="time">0</span> 秒</p>
+      </div>
+    </div>
+
+    <script>
+      const box = document.getElementById('animatedBox')
+      const startBtn = document.getElementById('startBtn')
+      const stopBtn = document.getElementById('stopBtn')
+      const resetBtn = document.getElementById('resetBtn')
+      const fpsDisplay = document.getElementById('fps')
+      const timeDisplay = document.getElementById('time')
+
+      // 容器宽度减去方块宽度，作为移动的最大距离
+      const maxX = document.querySelector('.container').offsetWidth - 50
+
+      let animationId = null
+      let startTime = null
+      let lastFrameTime = 0
+      let frameCount = 0
+      let lastFpsUpdateTime = 0
+
+      // 动画速度（像素/秒）
+      const speed = 200
+
+      function animate(timestamp) {
+        // 如果是第一帧，初始化开始时间
+        if (!startTime) {
+          startTime = timestamp
+          lastFpsUpdateTime = timestamp
+        }
+
+        // 计算已经过去的时间（毫秒）
+        const elapsedTime = timestamp - startTime
+
+        // 更新运行时间显示
+        timeDisplay.textContent = (elapsedTime / 1000).toFixed(1)
+
+        // 计算当前位置（基于经过的时间和速度）
+        let newX = ((speed * elapsedTime) / 1000) % (maxX * 2)
+
+        // 如果超过最大距离，反向移动
+        if (newX > maxX) {
+          newX = maxX * 2 - newX
+        }
+
+        // 更新方块位置
+        box.style.left = `${newX}px`
+
+        // 计算 FPS
+        frameCount++
+        if (timestamp - lastFpsUpdateTime >= 1000) {
+          // 每秒更新一次
+          const fps = Math.round((frameCount * 1000) / (timestamp - lastFpsUpdateTime))
+          fpsDisplay.textContent = fps
+          frameCount = 0
+          lastFpsUpdateTime = timestamp
+        }
+
+        // 继续下一帧动画
+        animationId = requestAnimationFrame(animate)
+      }
+
+      function startAnimation() {
+        if (!animationId) {
+          startTime = null
+          animationId = requestAnimationFrame(animate)
+        }
+      }
+
+      function stopAnimation() {
+        if (animationId) {
+          cancelAnimationFrame(animationId)
+          animationId = null
+        }
+      }
+
+      function resetAnimation() {
+        stopAnimation()
+        box.style.left = '0px'
+        timeDisplay.textContent = '0'
+        fpsDisplay.textContent = '0'
+      }
+
+      // 注册按钮点击事件
+      startBtn.addEventListener('click', startAnimation)
+      stopBtn.addEventListener('click', stopAnimation)
+      resetBtn.addEventListener('click', resetAnimation)
+    </script>
+  </body>
+</html>
