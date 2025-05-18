@@ -1,0 +1,34 @@
+{
+  "name": "@imooc.com/lint",
+  "version": "0.0.0",
+  "description": "> TODO: description",
+  "author": "sam <247765564@qq.com>",
+  "homepage": "",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://git.imooc.com/coding-607/cli-imooc.git"
+  },
+  "scripts": {
+    "test": "node ./__tests__/lint.test.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "@imooc.com/command": "^0.0.0",
+    "@imooc.com/utils": "^0.0.0",
+    "eslint": "^8.28.0",
+    "execa": "^6.1.0",
+    "fs-extra": "^10.1.0",
+    "jest": "^29.3.1",
+    "mocha": "^10.1.0",
+    "ora": "^6.1.2"
+  }
+}

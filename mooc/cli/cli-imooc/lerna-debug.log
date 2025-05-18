@@ -1,0 +1,13 @@
+0 silly argv {
+0 silly argv   _: [ 'add' ],
+0 silly argv   globs: [ 'packages/cli' ],
+0 silly argv   lernaVersion: '5.6.1',
+0 silly argv   '$0': 'lerna',
+0 silly argv   pkg: '@imooc.com/commit'
+0 silly argv }
+1 notice cli v5.6.1
+2 verbose rootPath /Users/sam/WebstormProjects/cli/cli-imooc
+3 error HttpErrorGeneral: 404 Not Found - GET https://registry.npmjs.org/@imooc.com%2fcommit - Not found
+3 error     at /Users/sam/WebstormProjects/cli/cli-imooc/node_modules/npm-registry-fetch/lib/check-response.js:95:15
+3 error     at processTicksAndRejections (internal/process/task_queues.js:95:5)
+3 error     at async RegistryFetcher.packument (/Users/sam/WebstormProjects/cli/cli-imooc/node_modules/pacote/lib/registry.js:92:19)

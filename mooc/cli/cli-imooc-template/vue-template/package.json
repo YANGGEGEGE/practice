@@ -1,0 +1,14 @@
+{
+  "name": "@imooc.com/template-vue3",
+  "version": "1.0.5",
+  "description": "cli-imooc vue3 template",
+  "author": "sam",
+  "license": "ISC",
+  "files": [
+    "plugins",
+    "template"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
