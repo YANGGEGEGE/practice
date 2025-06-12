@@ -1,3 +1,5 @@
+A0
+
 推荐使用vite创建react项目
 npm create vite@latest my-react-app -- --template react
 
