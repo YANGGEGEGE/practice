@@ -14,3 +14,4 @@ export default {
 };
 
 // 可以同时使用命名导出和默认导出 
+// export { sum as default, subtract };
