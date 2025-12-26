@@ -1,0 +1,21 @@
+{
+  "name": "crypto-sentinel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "加密货币监控与交易系统",
+  "author": "yangm4mini",
+  "license": "MIT",
+  "scripts": {
+    "dev": "pnpm --parallel --filter backend --filter frontend dev",
+    "build": "pnpm --filter backend build && pnpm --filter frontend build",
+    "lint": "pnpm --parallel --filter backend --filter frontend lint",
+    "test": "pnpm --parallel --filter backend --filter frontend test",
+    "clean": "pnpm --parallel --filter backend --filter frontend clean"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}
+
